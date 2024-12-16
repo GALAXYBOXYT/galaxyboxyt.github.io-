@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: black;
+            color: cyan;
+        }
+        h1 {
+            font-size: 36px;
+            text-shadow: 0 0 10px cyan;
+        }
+        #range, #operations {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: cyan;
+        }
+        #game {
+            display: none;
+            text-align: center;
+        }
+        .question {
+            font-size: 28px;
+            text-shadow: 0 0 10px cyan;
+        }
+        input[type="text"] {
+            font-size: 20px;
+            margin: 10px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 0 5px cyan;
+        }
+        button {
+            font-size: 20px;
+            margin: 10px;
+            padding: 10px;
+            background-color: cyan;
+            border: none;
+            border-radius: 5px;
+            color: black;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #00ffff; /* Lighter cyan on hover */
+        }
+        .result {
+            font-size: 24px;
+            text-shadow: 0 0 10px cyan;
+        }
+        #info {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid cyan;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px;
+            text-align: left;
+            color: cyan; 
+        }
+        #menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Math Game</h1>
+
+<div id="info">
+    <h2>How to Play</h2>
+    <p>Select a number range and the operations you want to practice.</p>
+    <p>Click "Start Game" to begin. You will be presented with math questions based on your selections.</p>
+    <p>Type your answer in the box provided and click "Submit." Your score will be updated.</p>
+
+    <h3>Operations Explained</h3>
+    <ul>
+        <li><strong>Addition:</strong> Combine two numbers. Example: 2 + 3 = 5.</li>
+        <li><strong>Subtraction:</strong> Take one number away from another. Example: 5 - 2 = 3.</li>
+        <li><strong>Multiplication:</strong> Add a number to itself a certain number of times. Example: 4 × 3 = 12.</li>
+        <li><strong>Division:</strong> Split a number into equal parts. Example: 12 ÷ 4 = 3.</li>
+        <li><strong>To the Power Of:</strong> Multiply a number by itself a certain number of times. Example: 2^3 = 8.</li>
+        <li><strong>Convert Fraction to Decimal:</strong> Change a fraction into a decimal. Example: 1/4 = 0.25.</li>
+    </ul>
+</div>
+
+<div id="menu">
+    <label for="range">Select Number Range:</label>
+    <select id="range">
+        <option value="5">1-5</option>
+        <option value="10">1-10</option>
+        <option value="50">1-50</option>
+        <option value="100">1-100</option>
+        <option value="150">1-150</option>
+        <option value="1000">1-1000</option>
+        <option value="1500">1-1500</option>
+        <option value="10000">1-10000</option>
+        <option value="15000">1-15000</option>
+        <option value="100000">1-100000</option>
+        <option value="150000">1-150000</option>
+    </select>
+
+    <fieldset id="operations">
+        <legend>Select Operations:</legend>
+        <label><input type="checkbox" value="addition"> Addition</label><br>
+        <label><input type="checkbox" value="subtraction"> Subtraction</label><br>
+        <label><input type="checkbox" value="multiplication"> Multiplication</label><br>
+        <label><input type="checkbox" value="division"> Division</label><br>
+        <label><input type="checkbox" value="power"> To the Power Of</label><br>
+        <label><input type="checkbox" value="fractionToDecimal"> Convert Fraction to Decimal</label><br>
+    </fieldset>
+
+    <button onclick="startGame()">Start Game</button>
+</div>
+
+<div id="game">
+    <div class="question" id="question"></div>
+    <input type="text" id="answer" placeholder="Your answer" />
+    <div>
+        <button onclick="checkAnswer()">Submit</button>
+    </div>
+    <div class="result">
+        Correct: <span id="correctCount">0</span> | 
+        Wrong: <span id="wrongCount">0</span>
+    </div>
+</div>
+
+<script>
+let correctCount = 0;
+let wrongCount = 0;
+let currentAnswer = 0;
+let operations = [];
+
+function startGame() {
+    correctCount = 0;
+    wrongCount = 0;
+    document.getElementById('correctCount').innerText = correctCount;
+    document.getElementById('wrongCount').innerText = wrongCount;
+
+    operations = Array.from(document.querySelectorAll('#operations input:checked')).map(checkbox => checkbox.value);
+
+    if (operations.length === 0) {
+        alert('Please select at least one operation!');
+        return;
+    }
+
+    // Hide the info box and menu, show the game
+    document.getElementById('info').style.display = 'none';
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('game').style.display = 'block';
+    generateQuestion();
+}
+
+function generateQuestion() {
+    const range = parseInt(document.getElementById('range').value);
+    const operation = operations[Math.floor(Math.random() * operations.length)];
+    let numbers = [];
+    
+    // Generate numbers based on selected range
+    for (let i = 0; i < 2; i++) {
+        numbers.push(Math.floor(Math.random() * range) + 1);
+    }
+
+    // Generate question based on the selected operation
+    let instruction = '';
+
+    if (operation === 'addition') {
+        currentAnswer = numbers.reduce((a, b) => a + b, 0);
+        instruction = 'Add both numbers:';
+        document.getElementById('question').innerText = `${instruction} ${numbers.join(' + ')} = ?`;
+    } else if (operation === 'subtraction') {
+        currentAnswer = numbers.reduce((a, b) => a - b);
+        instruction = 'Subtract the second number from the first:';
+        document.getElementById('question').innerText = `${instruction} ${numbers.join(' - ')} = ?`;
+    } else if (operation === 'multiplication') {
+        currentAnswer = numbers.reduce((a, b) => a * b);
+        instruction = 'Multiply both numbers:';
+        document.getElementById('question').innerText = `${instruction} ${numbers.join(' * ')} = ?`;
+    } else if (operation === 'division') {
+        let num1 = numbers[0] * numbers[1]; // Ensure divisibility
+        currentAnswer = num1 / numbers[1];
+        instruction = 'Divide the first number by the second:';
+        document.getElementById('question').innerText = `${instruction} ${num1} / ${numbers[1]} = ?`;
+    } else if (operation === 'power') {
+        currentAnswer = Math.pow(numbers[0], numbers[1]);
+        instruction = 'Calculate the power:';
+        document.getElementById('question').innerText = `${instruction} ${numbers[0]} ^ ${numbers[1]} = ?`;
+    } else if (operation === 'fractionToDecimal') {
+        const numerator = Math.floor(Math.random() * range) + 1;
+        const denominator = Math.floor(Math.random() * range) + 1;
+        currentAnswer = numerator / denominator;
+        instruction = 'Convert the fraction to a decimal:';
+        document.getElementById('question').innerText = `${instruction} ${numerator}/${denominator}`;
+    }
+
+    document.getElementById('answer').value = '';
+}
+
+function checkAnswer() {
+    const userAnswer = document.getElementById('answer').value.trim();
+
+    // Handle specific formats for fractions
+    if (userAnswer.includes('/')) {
+        const fractionParts = userAnswer.split('/');
+        const userNumerator = parseFloat(fractionParts[0]);
+        const userDenominator = parseFloat(fractionParts[1]);
+        const userFraction = userNumerator / userDenominator;
+
+        if (Math.abs(userFraction - currentAnswer) < 0.0001) { // Check for floating point precision
+            correctCount++;
+        } else {
+            wrongCount++;
+        }
+    } else if (userAnswer.includes('^')) {
+        const powerParts = userAnswer.split('^');
+        const base = parseFloat(powerParts[0]);
+        const exponent = parseFloat(powerParts[1]);
+        const userPower = Math.pow(base, exponent);
+        if (Math.abs(userPower - currentAnswer) < 0.0001) {
+            correctCount++;
+        } else {
+            wrongCount++;
+        }
+    } else {
+        const numericAnswer = parseFloat(userAnswer);
+        if (Math.abs(numericAnswer - currentAnswer) < 0.0001) {
+            correctCount++;
+        } else {
+            wrongCount++;
+        }
+    }
+
+    document.getElementById('correctCount').innerText = correctCount;
+    document.getElementById('wrongCount').innerText = wrongCount;
+
+    generateQuestion(); // Generate a new question
+}
+</script>
+
+</body>
+</html>
